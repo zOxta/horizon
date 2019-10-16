@@ -97,7 +97,7 @@
                  </div>
                  <div class="row mb-2" v-if="!job.completed_at">
                      <div class="col-md-2"><strong>Timeout At</strong></div>
-                     <div class="col">{{ readableTimestamp(((job.reserved_at ? job.reserved_at : job.payload.pushedAt) + job.payload.timeout)) }}</div>
+                     <div class="col">{{ readableTimestamp((parseFloat(job.reserved_at ? job.reserved_at : job.payload.pushedAt) + parseFloat(job.payload.timeout))) }}</div>
                  </div>
                  <div class="row">
                      <div class="col-md-2"><strong>Tags</strong></div>
