@@ -182,12 +182,12 @@
 
                 <tr v-for="job in jobs" :key="job.id">
                     <td>
-                        <router-link v-if="job.status !== 'failed'" :title="job.name" :to="{ name: 'recent-jobs-preview', params: { jobId: job.id }}">
-                            {{ jobBaseName(job.name) }}
-                        </router-link>
-                        <router-link v-else :title="job.name" :to="{ name: 'failed-jobs-preview', params: { jobId: job.id }}">
-                            {{ jobBaseName(job.name) }}
-                        </router-link><br>
+                         <router-link v-if="job.status !== 'failed'" :title="job.name" :to="{ name: 'recent-jobs-preview', params: { jobId: job.id }}">
+                             {{ jobBaseName(job.name) }}
+                         </router-link>
+                         <router-link v-else :title="job.name" :to="{ name: 'failed-jobs-preview', params: { jobId: job.id }}">
+                             {{ jobBaseName(job.name) }}
+                         </router-link><br>
 
                         <small class="text-muted">
                             Queue: {{job.queue}}
@@ -202,12 +202,16 @@
                         <span>{{ job.completed_at ? (job.completed_at - job.reserved_at).toFixed(2)+'s' : '-' }}</span>
                     </td>
 
-                    <td class="text-right table-fit">
+                    <td class="text-right table-fit" :title="job.status">
                         <svg v-if="job.status == 'completed'" class="fill-success" viewBox="0 0 20 20" style="width: 1.5rem; height: 1.5rem;">
                             <path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM6.7 9.29L9 11.6l4.3-4.3 1.4 1.42L9 14.4l-3.7-3.7 1.4-1.42z"></path>
                         </svg>
 
-                        <svg v-if="job.status == 'reserved' || job.status == 'pending'" class="fill-warning" viewBox="0 0 20 20" style="width: 1.5rem; height: 1.5rem;">
+                        <svg v-if="job.status == 'pending'" class="fill-info" viewBox="0 0 20 20" style="width: 1.5rem; height: 1.5rem;">
+                            <path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM7 6h2v8H7V6zm4 0h2v8h-2V6z"/>
+                        </svg>
+
+                        <svg v-if="job.status == 'reserved'" class="fill-warning" viewBox="0 0 20 20" style="width: 1.5rem; height: 1.5rem;">
                             <path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM7 6h2v8H7V6zm4 0h2v8h-2V6z"/>
                         </svg>
 
