@@ -524,6 +524,7 @@ class RedisJobRepository implements JobRepository
 
         return $job;
     }
+    
 
     /**
      * Mark the job as failed.
@@ -557,6 +558,27 @@ class RedisJobRepository implements JobRepository
                 $payload->id(), Chronos::now()->addMinutes($this->failedJobExpires)->getTimestamp()
             );
         });
+    }
+    
+    /**
+     * Find a pending job by ID.
+     *
+     * @param  string  $id
+     * @return \stdClass|null
+     */
+    public function findPending($id)
+    {
+        $attributes = $this->connection()->hmget(
+            $id, $this->keys
+        );
+
+        $job = is_array($attributes) && $attributes[0] !== null ? (object) array_combine($this->keys, $attributes) : null;
+
+        if ($job && $job->status !== 'pending') {
+            return;
+        }
+
+        return $job;
     }
 
     /**
@@ -601,6 +623,19 @@ class RedisJobRepository implements JobRepository
     public function deleteFailed($id)
     {
         $this->connection()->zrem('failed_jobs', $id);
+
+        $this->connection()->del($id);
+    }
+    
+    /**
+     * Delete a recent job by ID.
+     *
+     * @param  string  $id
+     * @return int
+     */
+    public function deleteRecent($id)
+    {
+        $this->connection()->zrem('recent_jobs', $id);
 
         $this->connection()->del($id);
     }

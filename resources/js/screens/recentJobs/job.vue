@@ -10,6 +10,7 @@
              return {
                  ready: false,
                  retrying: false,
+                 timestamp: null,
                  job: {}
              };
          },
@@ -29,6 +30,8 @@
              loadJob(id) {
                  this.ready = false;
 
+                 this.timestamp = (new Date()).getTime() / 1000;
+
                  this.$http.get('/' + Horizon.path + '/api/jobs/recent/' + id)
                      .then(response => {
                          this.job = response.data;
@@ -38,7 +41,7 @@
              },
 
             /**
-             * Retry the given failed job.
+             * Retry the given pending job.
              */
             retry(id) {
                 if (this.retrying) {
@@ -47,7 +50,7 @@
 
                 this.retrying = true;
 
-                this.$http.post('/' + Horizon.path + '/api/jobs/retry/' + id)
+                this.$http.post('/' + Horizon.path + '/api/jobs/retry/' + id + '?job_status=pending')
                     .then(() => {
                         setTimeout(() => {
                             this.reloadRetries();
@@ -61,6 +64,8 @@
              * Reload the job retries.
              */
             reloadRetries() {
+                this.timestamp = (new Date()).getTime() / 1000;
+
                 this.$http.get('/' + Horizon.path + '/api/jobs/recent/' + this.$route.params.jobId)
                     .then(response => {
                         this.job.retried_by = response.data.retried_by;
@@ -89,7 +94,7 @@
                  <h5 v-if="!ready">Job Preview</h5>
                  <h5 v-if="ready">{{job.name}}</h5>
 
-                <button class="btn btn-outline-primary" v-on:click.prevent="retry(job.id)">
+                <button class="btn btn-outline-primary" v-if="job.status == 'pending'" v-on:click.prevent="retry(job.id)">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="icon fill-primary" :class="{spin: retrying}">
                         <path d="M10 3v2a5 5 0 0 0-3.54 8.54l-1.41 1.41A7 7 0 0 1 10 3zm4.95 2.05A7 7 0 0 1 10 17v-2a5 5 0 0 0 3.54-8.54l1.41-1.41zM10 20l-4-4 4-4v8zm0-12V0l4 4-4 4z"/>
                     </svg>
@@ -139,7 +144,7 @@
                  </div>
                  <div class="row mb-2" v-if="!job.completed_at">
                      <div class="col-md-2"><strong>Waiting For</strong></div>
-                     <div class="col">{{ String((parseFloat((new Date()).getTime() / 1000) - parseFloat(job.reserved_at ? job.reserved_at : job.payload.pushedAt)).toFixed(2)) }}s</div>
+                     <div class="col">{{ String(((parseFloat(this.timestamp) - parseFloat(job.reserved_at ? job.reserved_at : job.payload.pushedAt)) / 60).toFixed(2)) }} mins</div>
                  </div>
                  <div class="row">
                      <div class="col-md-2"><strong>Tags</strong></div>
@@ -169,7 +174,7 @@
              </div>
          </div>
 
-        <div class="card mt-4" v-if="ready && job.retried_by.length">
+        <div class="card mt-4" v-if="ready && job.retried_by && job.retried_by.length">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5>Recent Retries</h5>
             </div>

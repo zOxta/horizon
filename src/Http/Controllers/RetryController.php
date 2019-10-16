@@ -3,6 +3,7 @@
 namespace Laravel\Horizon\Http\Controllers;
 
 use Laravel\Horizon\Jobs\RetryFailedJob;
+use Laravel\Horizon\Jobs\RetryPendingJob;
 
 class RetryController extends Controller
 {
@@ -14,6 +15,10 @@ class RetryController extends Controller
      */
     public function store($id)
     {
-        dispatch(new RetryFailedJob($id));
+        if (request()->job_status == 'pending') {
+            dispatch(new RetryPendingJob($id));
+        } else {
+            dispatch(new RetryFailedJob($id));
+        }
     }
 }

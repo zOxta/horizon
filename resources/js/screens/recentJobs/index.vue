@@ -161,7 +161,7 @@
                 <h5>Recent Jobs</h5>
 
                 <select v-model="filterStatus" class="form-control" style="width:200px">
-                    <option value="">All</option>
+                    <option value="">All Recent Jobs</option>
                     <option value="pending">Pending</option>
                     <option value="reserved">Reserved</option>
                     <option value="completed">Completed</option>
