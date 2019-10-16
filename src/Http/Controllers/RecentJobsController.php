@@ -67,7 +67,17 @@ class RecentJobsController extends Controller
      */
     protected function paginate(Request $request)
     {
-        return $this->jobs->getRecent($request->query('starting_at', -1))->map(function ($job) {
+        return $this->jobs->getRecent($request->query('starting_at', -1))->when($request->filter, function ($jobs) use ($request) {
+            
+            $collection = collect($jobs);
+            
+            foreach ($request->filter as $key =>$value) {
+                $collection = $collection->where($key, $value);
+            }
+            
+            return $collection;
+        })->map(function ($job) {
+
             return $this->decode($job);
         })->values();
     }
@@ -87,7 +97,16 @@ class RecentJobsController extends Controller
 
         $startingAt = $request->query('starting_at', 0);
 
-        return $this->jobs->getJobs($jobIds, $startingAt)->map(function ($job) {
+        return $this->jobs->getJobs($jobIds, $startingAt)->when($request->filter, function ($jobs) use ($request) {
+            
+            $collection = collect($jobs);
+            
+            foreach ($request->filter as $key =>$value) {
+                $collection = $collection->where($key, $value);
+            }
+            
+            return $collection;
+        })->map(function ($job) {
             return $this->decode($job);
         });
     }

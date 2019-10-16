@@ -8,6 +8,7 @@
         data() {
             return {
                 tagSearchPhrase: '',
+                filterStatus: '',
                 searchTimeout: null,
                 ready: false,
                 loadingNewEntries: false,
@@ -56,6 +57,16 @@
                     this.loadJobs();
                     this.refreshJobsPeriodically();
                 }, 500);
+            },
+
+            filterStatus() {
+                clearTimeout(this.searchTimeout);
+                clearInterval(this.interval);
+
+                this.searchTimeout = setTimeout(() => {
+                    this.loadJobs();
+                    this.refreshJobsPeriodically();
+                }, 500);
             }
         },
 
@@ -71,7 +82,11 @@
 
                 var tagQuery = this.tagSearchPhrase ? 'tag=' + this.tagSearchPhrase + '&' : '';
 
-                this.$http.get('/' + Horizon.path + '/api/jobs/recent?' + tagQuery + 'starting_at=' + starting + '&limit=' + this.perPage)
+                var filterQuery = this.filterStatus ? 'filter[status]=' + this.filterStatus + '&' : '';
+
+                var perPage = filterQuery ? this.perPage : 150;
+
+                this.$http.get('/' + Horizon.path + '/api/jobs/recent?' + tagQuery + filterQuery + 'starting_at=' + starting + '&limit=' + perPage)
                     .then(response => {
                         if (!this.$root.autoLoadsNewEntries && refreshing && this.jobs.length && _.first(response.data.jobs).id !== _.first(this.jobs).id) {
                             this.hasNewEntries = true;
@@ -145,6 +160,12 @@
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5>Recent Jobs</h5>
 
+                <select v-model="filterStatus" class="form-control" style="width:200px">
+                    <option value="">All</option>
+                    <option value="pending">Pending</option>
+                    <option value="reserved">Reserved</option>
+                    <option value="completed">Completed</option>
+                </select>
                 <input type="text" class="form-control" v-model="tagSearchPhrase" placeholder="Search Tags" style="width:200px">
             </div>
 
